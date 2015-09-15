@@ -42,8 +42,6 @@
 #include <QtCore/qdebug.h>
 #include <QtCore/QCoreApplication>
 
-#include <QtGui/private/qdrawhelper_p.h>
-
 #include "hybristexture.h"
 
 #include <QtCore/QElapsedTimer>
@@ -66,6 +64,21 @@ static QElapsedTimer qsg_renderer_timer;
 #define HYBRIS_PIXEL_FORMAT_BGRA_8888   5
 
 #define EGL_NATIVE_BUFFER_HYBRIS             0x3140
+
+// Taken from qdrawhelper_p.h
+static inline uint PREMUL(uint x) {
+    uint a = x >> 24;
+    uint t = (x & 0xff00ff) * a;
+    t = (t + ((t >> 8) & 0xff00ff) + 0x800080) >> 8;
+    t &= 0xff00ff;
+
+    x = ((x >> 8) & 0xff) * a;
+    x = (x + ((x >> 8) & 0xff) + 0x80);
+    x &= 0xff00;
+    x |= t | (a << 24);
+    return x;
+}
+static inline int qt_div_255(int x) { return (x + (x>>8) + 0x80) >> 8; }
 
 namespace CustomContext {
 
